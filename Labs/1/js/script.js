@@ -1,3 +1,6 @@
+// Acknowledgement: This code was debugged with assistance from ChatGPT and some of logic help was taken from it. 
+
+
 class Note {
     constructor(content) {
         this.content = content;
@@ -65,14 +68,24 @@ class NoteUI {
 
     displayNotes() {
         const notes = Note.getAllNotes();
-        this.notesList.innerHTML = '';
 
-        notes.forEach((noteContent, index) => {
-            const noteBox = this.createNoteBox(noteContent, index);
-            this.notesList.appendChild(noteBox);
-        });
+        // Check if the notes have changed
+        const notesChanged = JSON.stringify(notes) !== JSON.stringify(this.previousNotes);
 
-        this.updateLastUpdatedTime();
+        if (notesChanged) {
+            this.notesList.innerHTML = ''; // Clear current notes list
+
+            notes.forEach((noteContent, index) => {
+                const noteBox = this.createNoteBox(noteContent, index);
+                this.notesList.appendChild(noteBox);
+            });
+
+            // Update the "Last updated" time
+            this.updateLastUpdatedTime();
+
+            // Store the current state of notes
+            this.previousNotes = notes;
+        }
     }
 
     createNoteBox(noteContent, index) {
