@@ -18,13 +18,13 @@ class ServerApp {
         const pathname = parsedUrl.pathname;
 
         switch (pathname) {
-            case '/COMP4537/labs/3/getDate/':
+            case '/Comp4537/Labs/3/getDate/':
                 this.handleGetDate(req, res, parsedUrl.query);
                 break;
-            case '/COMP4537/labs/3/writeFile/':
+            case '/Comp4537/Labs/3/writeFile/':
                 this.handleWriteFile(req, res, parsedUrl.query);
                 break;
-            case `/COMP4537/labs/3/readFile/${path.basename(this.filePath)}`:
+            case `/Comp4537/Labs/3/readFile/${path.basename(this.filePath)}`:
                 this.handleReadFile(req, res);
                 break;
             default:
