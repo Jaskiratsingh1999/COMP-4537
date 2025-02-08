@@ -159,7 +159,12 @@ function getDefinition(e) {
 window.onload = () => {
   console.log("Window onload executed");
 
-  const pathname = window.location.pathname.replace("/COMP-4537/Labs/4", "");
+  // const pathname = window.location.pathname.replace("/COMP-4537/Labs/4", "");
+  const isGitHubPages = window.location.hostname.includes("github.io");
+  const basePath = isGitHubPages ? "/COMP-4537/Labs/4" : "";
+
+  const pathname = window.location.pathname.replace(basePath, "");
+
   console.log("Current pathname: ", pathname);
 
   if (pathname.endsWith("store.html")) {
