@@ -1,5 +1,5 @@
 const localEndpoint = "http://localhost:8080/api/definitions";
-const productionEndpoint = "https://noufilsaqib.com/COMP4537/labs/4/api/definitions";
+const productionEndpoint ="https://lab4api.onrender.com/labs/4/api/definitions";
 const searchedTermMsg = "<strong>Word:</strong> ";
 const searchedDefinitionMsg = "<strong>Definition:</strong> ";
 const failedPostResponseMsg = "Error: No response from server";
