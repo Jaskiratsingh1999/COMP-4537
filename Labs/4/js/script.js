@@ -6,22 +6,42 @@ const searchResultsElement = document.getElementById("searchResults");
 const wordElement = document.getElementById("word");
 const definitionElement = document.getElementById("definition");
 
-// Used to ensure correct URL is used for local and production environments
 function getEndpointUrl() {
   const baseUrl = window.location.origin;
-  return baseUrl.includes("localhost") ? localEndpoint : productionEndpoint;
+  console.log("Base URL: ", baseUrl);
+  const endpoint =
+    baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")
+      ? localEndpoint
+      : productionEndpoint;
+  console.log("Using endpoint: ", endpoint);
+  return endpoint;
 }
+
 
 function createWord(e) {
   e.preventDefault();
-  const word = wordElement.value.toLowerCase();
-  const definition = definitionElement.value;
+  console.log("CreateWord function triggered");
+
+  const word = wordElement.value.trim().toLowerCase();
+  const definition = definitionElement.value.trim();
+
+  if (!word || !definition) {
+    errorMessageElement.innerHTML = "Both word and definition are required.";
+    console.error("Error: Missing word or definition");
+    return;
+  }
+
   const xhr = new XMLHttpRequest();
   const url = getEndpointUrl();
 
+  console.log("Endpoint URL: ", url);
+
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
   xhr.onreadystatechange = () => {
+    console.log("XHR readyState: ", xhr.readyState, "XHR status: ", xhr.status);
+
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         wordElement.value = "";
@@ -38,7 +58,8 @@ function createWord(e) {
           !res.word ||
           !res.definition
         ) {
-          errorMessageElement.innerHTML = failedPostResponseMsg;
+          errorMessageElement.innerHTML = "Failed to process the response.";
+          console.error("Invalid response format received");
           return;
         }
 
@@ -47,59 +68,122 @@ function createWord(e) {
           .replace("%NUMREQ", res.numReq)
           .replace("%DATE", res.date)
           .replace("%TOTALWORDS", res.totalWords);
+
         const newEntryElement = document.createElement("h3");
         newEntryElement.innerHTML = newEntryPostMsg
           .replace("%WORD", res.word)
           .replace("%DEFINITION", res.definition);
+
         successResultsElement.appendChild(numRequestsElement);
         successResultsElement.appendChild(newEntryElement);
+
+        console.log("Word successfully added:", res.word);
       } else {
         successResultsElement.innerHTML = "";
         errorMessageElement.innerHTML = xhr.responseText;
+        console.error("Error posting word:", xhr.responseText);
       }
     }
   };
-  xhr.send("word=" + word + "&definition=" + definition);
+
+  console.log("Sending data:", { word, definition });
+  xhr.send(
+    "word=" +
+      encodeURIComponent(word) +
+      "&definition=" +
+      encodeURIComponent(definition)
+  );
+
   xhr.onerror = (e) => {
-    errorMessageElement.innerHTML = e.responseText;
+    errorMessageElement.innerHTML =
+      "An error occurred while sending the request.";
+    console.error("Request error:", e);
   };
 }
+
 
 function getDefinition(e) {
   e.preventDefault();
+  console.log("GetDefinition function triggered");
+
   const word = wordElement.value.toLowerCase();
+  if (!word) {
+    console.error("No word entered for search");
+    errorMessageElement.innerHTML = "Please enter a word to search.";
+    return;
+  }
+
   const xhr = new XMLHttpRequest();
-  const url = `${getEndpointUrl()}?word=${word}`;
+  const url = `${getEndpointUrl()}?word=${encodeURIComponent(word)}`;
+
+  console.log("Endpoint URL (GET): ", url);
+
   xhr.open("GET", url, true);
   xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
+    console.log("XHR readyState: ", xhr.readyState, "XHR status: ", xhr.status);
+    if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         errorMessageElement.innerText = "";
         searchResultsElement.innerHTML = "";
+
         const searchedTerm = document.createElement("h3");
-        searchedTerm.innerHTML = searchedTermMsg + word;
+        searchedTerm.innerHTML = `Word: ${word}`;
         const searchedDefinition = document.createElement("h3");
-        searchedDefinition.innerHTML = searchedDefinitionMsg + xhr.responseText;
+        searchedDefinition.innerHTML = `Definition: ${xhr.responseText}`;
+
         searchResultsElement.appendChild(searchedTerm);
         searchResultsElement.appendChild(searchedDefinition);
+
+        console.log("Search successful: ", xhr.responseText);
+      } else if (xhr.status === 404) {
+        errorMessageElement.innerHTML = `The word "${word}" was not found.`;
+        console.error("Word not found: ", word);
       } else {
-        searchResultsElement.innerHTML = "";
-        errorMessageElement.innerHTML = xhr.responseText;
+        errorMessageElement.innerHTML = "An error occurred while searching.";
+        console.error("Search request failed: ", xhr.responseText);
       }
     }
   };
-  xhr.send();
+
   xhr.onerror = (e) => {
-    errorMessageElement.innerHTML = e.responseText;
+    errorMessageElement.innerHTML =
+      "An error occurred during the search request.";
+    console.error("Error with search request: ", e); // Debug: log error
   };
+
+  xhr.send();
 }
+
 
 // Run when the page is loaded
 window.onload = () => {
+  console.log("Window onload executed");
+
   const pathname = window.location.pathname.replace("/COMP4537/labs/4", "");
-  if (pathname.startsWith("/search")) {
-    searchWordBtn.addEventListener("click", getDefinition);
-  } else if (pathname.startsWith("/store")) {
-    createWordBtn.addEventListener("click", createWord);
+  console.log("Current pathname: ", pathname);
+
+  if (pathname.endsWith("store.html")) {
+    console.log("Store page detected");
+
+    const createWordBtn = document.getElementById("createWordBtn");
+    if (createWordBtn) {
+      console.log("CreateWord button found");
+      createWordBtn.addEventListener("click", createWord);
+    } else {
+      console.error("CreateWord button not found!");
+    }
+  }
+
+  if (pathname.endsWith("search.html")) {
+    console.log("Search page detected");
+
+    const searchWordBtn = document.getElementById("searchWordBtn");
+    if (searchWordBtn) {
+      console.log("SearchWord button found");
+      searchWordBtn.addEventListener("click", getDefinition);
+    } else {
+      console.error("SearchWord button not found!");
+    }
   }
 };
+
