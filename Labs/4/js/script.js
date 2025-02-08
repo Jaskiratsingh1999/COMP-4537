@@ -161,11 +161,18 @@ window.onload = () => {
 
   // const pathname = window.location.pathname.replace("/COMP-4537/Labs/4", "");
   const isGitHubPages = window.location.hostname.includes("github.io");
-  const basePath = isGitHubPages ? "/COMP-4537/Labs/4" : "";
+  const hasLabsPath = window.location.pathname.includes("/Labs/4");
 
-  const pathname = window.location.pathname.replace(basePath, "");
+  // Determine the base path dynamically
+  const basePath = isGitHubPages ? "/COMP-4537/Labs/4" : (hasLabsPath ? "/Labs/4" : "");
 
-  console.log("Current pathname: ", pathname);
+  // Normalize the pathname
+  const pathname = window.location.pathname.startsWith(basePath)
+      ? window.location.pathname.replace(basePath, "")
+      : window.location.pathname;
+
+  console.log("Resolved Pathname:", pathname);
+
 
   if (pathname.endsWith("store.html")) {
     console.log("Store page detected");
