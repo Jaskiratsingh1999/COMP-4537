@@ -159,7 +159,7 @@ function getDefinition(e) {
 window.onload = () => {
   console.log("Window onload executed");
 
-  const pathname = window.location.pathname.replace("/COMP4537/labs/4", "");
+  const pathname = window.location.pathname.replace("/COMP-4537/Labs/4", "");
   console.log("Current pathname: ", pathname);
 
   if (pathname.endsWith("store.html")) {
