@@ -6,13 +6,13 @@ const searchResultsElement = document.getElementById("searchResults");
 const wordElement = document.getElementById("word");
 const definitionElement = document.getElementById("definition");
 
-function getEndpointUrl() {
+function getEndpointUrl() { // Just gets the end point depending on the host.
   const baseUrl = window.location.origin;
   console.log("Base URL: ", baseUrl);
   const endpoint =
-    baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")
+    baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1") // If the url has this, use the localhost.
       ? localEndpoint
-      : productionEndpoint;
+      : productionEndpoint; // Use the production host otherwise.
   console.log("Using endpoint: ", endpoint);
   return endpoint;
 }
@@ -25,30 +25,34 @@ function createWord(e) {
   const word = wordElement.value.trim().toLowerCase();
   const definition = definitionElement.value.trim();
 
-  if (!word || !definition) {
+  if (!word || !definition) { // Check if both fields are filled.
     errorMessageElement.innerHTML = "Both word and definition are required.";
     console.error("Error: Missing word or definition");
     return;
   }
 
-  const xhr = new XMLHttpRequest();
-  const url = getEndpointUrl();
+  const xhr = new XMLHttpRequest(); 
+  const url = getEndpointUrl(); 
 
   console.log("Endpoint URL: ", url);
 
-  xhr.open("POST", url, true);
+  xhr.open("POST", url, true); // Sending a post request to the backend.
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
   xhr.onreadystatechange = () => {
     console.log("XHR readyState: ", xhr.readyState, "XHR status: ", xhr.status);
 
+    // Check if the request has been completed.
     if (xhr.readyState === XMLHttpRequest.DONE) {
+      // Check the status of the request. 200 is success.
       if (xhr.status === 200) {
+        // Clear the input fields if successful.
         wordElement.value = "";
         definitionElement.value = "";
         errorMessageElement.innerHTML = "";
         successResultsElement.innerHTML = "";
 
+        // Convert the response into a JSON. A valid js object.
         const res = JSON.parse(xhr.responseText);
         if (
           !res ||
@@ -85,8 +89,10 @@ function createWord(e) {
       }
     }
   };
-
+  
   console.log("Sending data:", { word, definition });
+  // Send the word and definition as form data
+  // We use encodeURIComponent to make sure that special characters are properly encoded
   xhr.send(
     "word=" +
       encodeURIComponent(word) +
@@ -94,6 +100,7 @@ function createWord(e) {
       encodeURIComponent(definition)
   );
 
+  // Send an error message if an error occured while making a request. Example, server is down.
   xhr.onerror = (e) => {
     errorMessageElement.innerHTML =
       "An error occurred while sending the request.";
@@ -103,29 +110,35 @@ function createWord(e) {
 
 
 function getDefinition(e) {
-  e.preventDefault();
+  e.preventDefault(); // Stops page from refreshing
   console.log("GetDefinition function triggered");
-
+  
   const word = wordElement.value.toLowerCase();
   if (!word) {
     console.error("No word entered for search");
     errorMessageElement.innerHTML = "Please enter a word to search.";
     return;
   }
-
+  
   const xhr = new XMLHttpRequest();
+  // Here is the query. Get the word that we want to send to the server.
   const url = `${getEndpointUrl()}?word=${encodeURIComponent(word)}`;
 
   console.log("Endpoint URL (GET): ", url);
 
+  // Opening a connection and performing a get request to the server.
   xhr.open("GET", url, true);
   xhr.onreadystatechange = () => {
     console.log("XHR readyState: ", xhr.readyState, "XHR status: ", xhr.status);
+    // Checks if the request is done.
     if (xhr.readyState === XMLHttpRequest.DONE) {
+      // Check if no issues happened.
       if (xhr.status === 200) {
+        // Clear the fields.
         errorMessageElement.innerText = "";
         searchResultsElement.innerHTML = "";
 
+        // Put the word and definitions recevied from the server in the UI.
         const searchedTerm = document.createElement("h3");
         searchedTerm.innerHTML = `Word: ${word}`;
         const searchedDefinition = document.createElement("h3");
